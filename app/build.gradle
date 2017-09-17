@@ -1,0 +1,63 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 26
+    buildToolsVersion "26.0.0"
+    defaultConfig {
+        applicationId "com.nilanshi.nigam.personalassistant"
+        minSdkVersion 19
+        targetSdkVersion 25
+        versionCode 1
+        multiDexEnabled true
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.github.bumptech.glide:glide:4.0.0'
+    compile 'com.android.support:support-v4:26.+'
+    compile 'com.specyci:residemenu:1.6'
+    compile 'com.google.firebase:firebase-database:11.0.4'
+    compile 'com.facebook.android:facebook-android-sdk:[4,5)'
+    compile 'com.google.firebase:firebase-core:11.0.4'
+    compile 'com.google.firebase:firebase-auth:11.0.4'
+    compile 'com.android.support:design:26.+'
+    compile 'com.google.android.gms:play-services-auth:11.0.4'
+    compile 'ai.api:sdk:2.0.7@aar'
+    compile 'com.mapzen.android:speakerbox:1.4.1'
+    compile 'com.cleveroad:audiovisualization:1.0.0'
+    compile 'com.github.florent37:materialtextfield:1.0.7'
+    compile 'com.nightonke:boommenu:2.1.0'
+    compile 'com.github.blennerSilva:AwesomeDialog:2.0.1'
+    compile 'com.squareup.picasso:picasso:2.3.2'
+    compile 'com.github.feeeei:CircleSeekbar:v1.1.2'
+    compile 'com.android.support:multidex:1.0.0'
+    compile 'com.ashokvarma.android:bottom-navigation-bar:2.0.2'
+    compile 'com.android.support:support-vector-drawable:26.+'
+    testCompile 'junit:junit:4.12'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0'
+    compile 'com.android.support:support-v4:26.0.0-alpha1'
+    compile 'ai.api:libai:1.6.11'
+}
+configurations.all{
+    resolutionStrategy.eachDependency{
+        DependencyResolveDetails details ->
+            def requested= details.requested
+            if(requested.group=='com.android.support'){
+                if(!requested.name.startsWith("multidex")){
+                    details.useVersion '26.0.0-alpha1'
+                }
+            }
+    }
+}
+apply plugin: 'com.google.gms.google-services'

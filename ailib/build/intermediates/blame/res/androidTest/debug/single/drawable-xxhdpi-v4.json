@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "E:\\PersonalAssistant\\ailib\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-xxhdpi-v4\\cube.png",
+        "source": "E:\\PersonalAssistant\\ailib\\build\\intermediates\\bundles\\debug\\res\\drawable-xxhdpi-v4\\cube.png"
+    },
+    {
+        "merged": "E:\\PersonalAssistant\\ailib\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-xxhdpi-v4\\speaker.png",
+        "source": "E:\\PersonalAssistant\\ailib\\build\\intermediates\\bundles\\debug\\res\\drawable-xxhdpi-v4\\speaker.png"
+    },
+    {
+        "merged": "E:\\PersonalAssistant\\ailib\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-xxhdpi-v4\\speaker_silent.png",
+        "source": "E:\\PersonalAssistant\\ailib\\build\\intermediates\\bundles\\debug\\res\\drawable-xxhdpi-v4\\speaker_silent.png"
+    },
+    {
+        "merged": "E:\\PersonalAssistant\\ailib\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-xxhdpi-v4\\microphone_control.png",
+        "source": "E:\\PersonalAssistant\\ailib\\build\\intermediates\\bundles\\debug\\res\\drawable-xxhdpi-v4\\microphone_control.png"
+    }
+]

@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "334181304932",
+    "firebase_url": "https://personalassistant-656cf.firebaseio.com",
+    "project_id": "personalassistant-656cf",
+    "storage_bucket": "personalassistant-656cf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:334181304932:android:0276ef14ab95c7dc",
+        "android_client_info": {
+          "package_name": "com.nilanshi.nigam.personalassistant"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "334181304932-urgc6cqa3r3l41lgm0jeqt63hrla7vlh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nilanshi.nigam.personalassistant",
+            "certificate_hash": "c5946f13d5a4e1197261c1cdbaa91d5198ce4fe4"
+          }
+        },
+        {
+          "client_id": "334181304932-541r14079l6hvdibvbuctg603as5su22.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLQ2wqtvfbMMut_O7Rf9aGibnfuDetRhU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "334181304932-541r14079l6hvdibvbuctg603as5su22.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
