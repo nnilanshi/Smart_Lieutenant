@@ -14,7 +14,8 @@ public class MyIntent {
     public MyIntent(Context context) {
         this.context = context;
     }
-//context is used as intent works for present class
+
+/*context is used as intent works for present class*/
     public void createAlarm(String message, int hour, int minutes) {
         Intent intent = new Intent(AlarmClock.ACTION_SET_ALARM)
                 .putExtra(AlarmClock.EXTRA_MESSAGE, message)
