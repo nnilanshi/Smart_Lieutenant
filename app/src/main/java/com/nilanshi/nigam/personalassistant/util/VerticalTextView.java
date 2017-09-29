@@ -1,4 +1,4 @@
-package com.nilanshi.nigam.personalassistant.activity;
+package com.nilanshi.nigam.personalassistant.util;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.text.TextPaint;

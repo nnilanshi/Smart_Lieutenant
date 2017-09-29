@@ -80,7 +80,6 @@ import ai.api.model.Fulfillment;
 import ai.api.model.Result;
 
 
-
 import static com.nightonke.boommenu.BoomButtons.ButtonPlaceEnum.HAM_4;
 
 public class CommandActivity extends BaseActivity
@@ -122,6 +121,7 @@ public class CommandActivity extends BaseActivity
     private ArrayList<Object> result;
     private CardView cardContainer;
     private String response;
+    private String action;
 
 
     @Override
@@ -294,7 +294,7 @@ public class CommandActivity extends BaseActivity
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             permission = checkSelfPermission(Manifest.permission.RECORD_AUDIO);
             if (permission != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.MODIFY_AUDIO_SETTINGS}, 212);
+                requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.MODIFY_AUDIO_SETTINGS, Manifest.permission.SET_ALARM}, 212);
                 return;
             } else {
                 setupVisualizer();
@@ -665,7 +665,8 @@ public class CommandActivity extends BaseActivity
                         "\nAction: " + result1.getAction() +
                         "\nParameters: " + parameterString);
                 fulfillment = result1.getFulfillment();
-                aiSpeech =fulfillment.getSpeech();
+                action = result1.getAction();
+                aiSpeech = fulfillment.getSpeech();
                 sbox.play(fulfillment.getSpeech());
 
                 speech.destroy();
@@ -679,14 +680,27 @@ public class CommandActivity extends BaseActivity
         recycler.setAdapter(adapter);
         final LayoutAnimationController controller =
                 AnimationUtils.loadLayoutAnimation(context, R.anim.layout_animation_fall_down);
-
+        process_action(action);
         recycler.setLayoutAnimation(controller);
 
         recycler.scheduleLayoutAnimation();
 
         list.add(result1.getResolvedQuery());
 
-       list.add(aiSpeech);
+        list.add(aiSpeech);
+
+    }
+
+    //intent working
+    private void process_action(String action) {
+        MyIntent myIntent = new MyIntent(context);
+        switch (action) {
+            case "alarm.set":
+                setupPermissions();
+                myIntent.createAlarm("hello Alarm set",0,0);
+
+                break;
+        }
 
     }
 

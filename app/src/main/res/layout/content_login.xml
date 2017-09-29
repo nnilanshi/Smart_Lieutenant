@@ -30,7 +30,7 @@
             android:orientation="horizontal"
             app:layout_widthPercent="85%">
 
-            <com.nilanshi.nigam.personalassistant.activity.VerticalTextView
+            <com.nilanshi.nigam.personalassistant.util.VerticalTextView
                 android:id="@+id/tvSigninInvoker"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -60,7 +60,7 @@
             android:orientation="horizontal"
             app:layout_widthPercent="15%">
 
-            <com.nilanshi.nigam.personalassistant.activity.VerticalTextView
+            <com.nilanshi.nigam.personalassistant.util.VerticalTextView
                 android:id="@+id/tvSignupInvoker"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
