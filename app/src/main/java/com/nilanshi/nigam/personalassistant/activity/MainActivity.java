@@ -127,11 +127,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public void onClick(View view) {
 
         if (view == itemLogin) {
-            Intent i = new Intent(MainActivity.this, LoginActivity.class);
+                Intent i = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(i);
 
         } else if (view == itemSignUp) {
-            Intent i = new Intent(MainActivity.this, SignupActivity.class);
+            Intent i = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(i);
 
         } else if (view == itemRate) {

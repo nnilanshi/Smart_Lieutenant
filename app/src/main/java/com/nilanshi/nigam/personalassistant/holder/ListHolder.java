@@ -12,11 +12,12 @@ import com.nilanshi.nigam.personalassistant.R;
 
 public class ListHolder extends RecyclerView.ViewHolder {
     public TextView tvText;
+    public View cardContainer;
 
     public ListHolder(View itemView) {
 
         super(itemView);
         tvText =(TextView)itemView.findViewById(R.id.tvText);
-
+        cardContainer = (View)itemView.findViewById(R.id.cardContainer);
     }
 }

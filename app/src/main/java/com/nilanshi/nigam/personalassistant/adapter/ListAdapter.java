@@ -1,6 +1,7 @@
 package com.nilanshi.nigam.personalassistant.adapter;
 
 import android.content.Context;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,16 +36,25 @@ public class ListAdapter extends RecyclerView.Adapter<ListHolder> {
     @Override
     public void onBindViewHolder(ListHolder holder, int position) {
         //to animate the holder
-        String te = list.get(position);
+       String te = list.get(position);
         holder.tvText.setText(te);
         //animate(holder);
+        CardView.LayoutParams layoutParams = new CardView.LayoutParams(
+                CardView.LayoutParams.WRAP_CONTENT,
+                CardView.LayoutParams.WRAP_CONTENT);
+        if (position%2 == 0){
+            layoutParams.leftMargin = 400;
 
+            holder.cardContainer.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+
+
+
+        } else {
+
+            layoutParams.leftMargin = 0;
+        }
+        holder.cardContainer.setLayoutParams(layoutParams);
     }
-
-   /* private void animate(ListHolder holder) {
-        final Animation animAnticipateOvershoot = AnimationUtils.loadAnimation(context,R.anim.bounce_interpolator);
-        holder.itemView.setAnimation(animAnticipateOvershoot);
-    }*/
 
     @Override
     public int getItemCount() {

@@ -4,7 +4,6 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,23 +16,27 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.ActionBar;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.NestedScrollView;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.AnimationUtils;
 import android.view.animation.AnticipateOvershootInterpolator;
+import android.view.animation.LayoutAnimationController;
+import android.widget.Adapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -53,7 +56,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.gson.JsonElement;
 import com.mapzen.speakerbox.Speakerbox;
 import com.nightonke.boommenu.BoomButtons.BoomButton;
-import com.nightonke.boommenu.BoomButtons.ButtonPlaceEnum;
 import com.nightonke.boommenu.BoomMenuButton;
 import com.nightonke.boommenu.ButtonEnum;
 import com.nightonke.boommenu.OnBoomListener;
@@ -61,20 +63,25 @@ import com.nightonke.boommenu.Piece.PiecePlaceEnum;
 import com.nilanshi.nigam.personalassistant.R;
 import com.nilanshi.nigam.personalassistant.adapter.ListAdapter;
 import com.nilanshi.nigam.personalassistant.util.BuilderManager;
-import com.nilanshi.nigam.personalassistant.util.VoiceControl;
+import com.nilanshi.nigam.personalassistant.util.ListModel;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import ai.api.RequestExtras;
 import ai.api.android.AIConfiguration;
 import ai.api.android.AIService;
+import ai.api.model.AIContext;
 import ai.api.model.AIError;
 import ai.api.model.AIResponse;
+import ai.api.model.Fulfillment;
 import ai.api.model.Result;
 
+
+
 import static com.nightonke.boommenu.BoomButtons.ButtonPlaceEnum.HAM_4;
-import static com.nilanshi.nigam.personalassistant.R.id.rvList;
 
 public class CommandActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnBoomListener, RecognitionListener, AudioVisualization, ai.api.AIListener {
@@ -96,7 +103,6 @@ public class CommandActivity extends BaseActivity
     private Speakerbox sbox;
     private ArrayList<String> list;
     private ListAdapter adapter;
-    private BoomMenuButton leftBmb;
     private BoomMenuButton rightBmb;
 
     private Intent intent;
@@ -107,6 +113,15 @@ public class CommandActivity extends BaseActivity
     private String name_key;
     private TextView returnedTextView;
     private AIService aiService;
+    private NestedScrollView bottom_sheet1;
+    private CoordinatorLayout container;
+    private BottomSheetBehavior behavior;
+    private Result result1;
+    private Fulfillment fulfillment;
+    private String aiSpeech;
+    private ArrayList<Object> result;
+    private CardView cardContainer;
+    private String response;
 
 
     @Override
@@ -115,6 +130,9 @@ public class CommandActivity extends BaseActivity
         setContentView(R.layout.activity_command);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        result = new ArrayList<>();
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -129,6 +147,10 @@ public class CommandActivity extends BaseActivity
         tvText = (TextView) findViewById(R.id.tvText);
         btnSpeak = (FloatingActionButton) findViewById(R.id.btnSpeak);
         returnedTextView = (TextView) findViewById(R.id.returnedTextView);
+        bottom_sheet1 = (NestedScrollView) findViewById(R.id.bottom_sheet);
+        container = (CoordinatorLayout) findViewById(R.id.container);
+        cardContainer = (CardView) findViewById(R.id.cardContainer);
+
         setupPermissions();
         speech = SpeechRecognizer.createSpeechRecognizer(this);
         speech.setRecognitionListener(this);
@@ -160,22 +182,23 @@ public class CommandActivity extends BaseActivity
         Toast.makeText(context, "" + (float) pitch / 100, Toast.LENGTH_SHORT).show();
         /*circular seekbaar*/
 
+        /*language preferences*/
         lang_pref = getSharedPreferences("lang_pref", MODE_PRIVATE);
         String lang = lang_pref.getString("select_string", "nothing selected");
         Locale locale = new Locale(lang);
         textToSpeech.setLanguage(locale);
+        /*language preferences*/
 
         setupVisualizer();
         animateSpeak();
 
-        //recyclerView
-        recycler = (RecyclerView) findViewById(rvList);
+        /*recyclerView*/
+      /* recycler = (RecyclerView) findViewById(R.id.rvList);
         LinearLayoutManager manager = new LinearLayoutManager(this);
         list = new ArrayList<>();
         adapter = new ListAdapter(list);
         recycler.setLayoutManager(manager);
-        recycler.setAdapter(adapter);
-        // recycler.animate().setInterpolator(new BounceInterpolator());
+        recycler.setAdapter(adapter);*/
 
 
         /*facebook details*/
@@ -199,6 +222,19 @@ public class CommandActivity extends BaseActivity
                 AIConfiguration.SupportedLanguages.English, AIConfiguration.RecognitionEngine.System);
         aiService = AIService.getService(this, config);
         aiService.setListener(this);
+
+        //bottom sheet
+        BottomSheetBehavior.BottomSheetCallback sheetCallback = new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+
+            }
+        };
+        behavior = BottomSheetBehavior.from(bottom_sheet1);
 
     }
 
@@ -304,6 +340,7 @@ public class CommandActivity extends BaseActivity
                     }
                 });
         /*animation*/
+
     }
 
     @Override
@@ -424,16 +461,21 @@ public class CommandActivity extends BaseActivity
 
     @Override
     public void onResults(Bundle results) {
-        ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+        /*ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
         String text = "";
         if (matches != null && matches.size() > 0) {
             String response = matches.get(0);
             list.add(response);
             adapter.notifyDataSetChanged();
             tvText.setText(response);
-        }
-    }
+        }*/
+        ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+        String text = "";
+        for (String result : matches)
+            text += result + "\n";
+        response = matches.get(0).toString().trim();
 
+    }
 
     @Override
     public void onPartialResults(Bundle partialResults) {
@@ -442,7 +484,6 @@ public class CommandActivity extends BaseActivity
     @Override
     public void onEvent(int eventType, Bundle params) {
     }
-
 
     @Override
     public void onBackPressed() {
@@ -453,7 +494,6 @@ public class CommandActivity extends BaseActivity
             super.onBackPressed();
         }
     }
-
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -562,7 +602,7 @@ public class CommandActivity extends BaseActivity
     public void onBoomDidShow() {
 
     }
-/*boom*/
+    /*boom*/
 
     /*Feedback*/
     private void Feedback() {
@@ -603,31 +643,56 @@ public class CommandActivity extends BaseActivity
             startActivity(intent);
         }
     }
+    /*feedback*/
 
     @Override
-    public void onResult(AIResponse response) {
+    public void onResult(final AIResponse response) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                result1 = response.getResult();
+                // Get parameters
+                String parameterString = "";
+                if (result1.getParameters() != null && !result1.getParameters().isEmpty()) {
+                    for (final Map.Entry<String, JsonElement> entry : result1.getParameters().entrySet()) {
+                        parameterString += "(" + entry.getKey() + ", " + entry.getValue() + ") ";
+                    }
+                }
 
-        Result result1 = response.getResult();
+                // Show results in TextView.
+                returnedTextView.setText("Query:" + result1.getResolvedQuery() +
+                        "\nAction: " + result1.getAction() +
+                        "\nParameters: " + parameterString);
+                fulfillment = result1.getFulfillment();
+                aiSpeech =fulfillment.getSpeech();
+                sbox.play(fulfillment.getSpeech());
 
-        // Get parameters
-        String parameterString = "";
-        if (result1.getParameters() != null && !result1.getParameters().isEmpty()) {
-            for (final Map.Entry<String, JsonElement> entry : result1.getParameters().entrySet()) {
-                parameterString += "(" + entry.getKey() + ", " + entry.getValue() + ") ";
+                speech.destroy();
             }
-        }
+        });
+        recycler = (RecyclerView) findViewById(R.id.rvList);
+        LinearLayoutManager manager = new LinearLayoutManager(this);
+        list = new ArrayList<>();
+        adapter = new ListAdapter(list);
+        recycler.setLayoutManager(manager);
+        recycler.setAdapter(adapter);
+        final LayoutAnimationController controller =
+                AnimationUtils.loadLayoutAnimation(context, R.anim.layout_animation_fall_down);
 
-        // Show results in TextView.
-        returnedTextView.setText("Query:" + result1.getResolvedQuery() +
-                "\nAction: " + result1.getAction() +
-                "\nParameters: " + parameterString);
-        aiService = null;
+        recycler.setLayoutAnimation(controller);
+
+        recycler.scheduleLayoutAnimation();
+
+        list.add(result1.getResolvedQuery());
+
+       list.add(aiSpeech);
 
     }
 
     @Override
     public void onError(AIError error) {
-
+        returnedTextView.setText(error.toString());
     }
 
     @Override
@@ -649,6 +714,12 @@ public class CommandActivity extends BaseActivity
     public void onListeningFinished() {
 
     }
-    /*feedback*/
 
+    public void listContext() {
+        List<AIContext> contexts = new ArrayList<>();
+        contexts.add(new AIContext("firstContext"));
+        contexts.add(new AIContext("secondContext"));
+        RequestExtras requestExtras = new RequestExtras(contexts, null);
+        aiService.startListening(requestExtras);
+    }
 }

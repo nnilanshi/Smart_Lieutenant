@@ -1,13 +1,23 @@
 package com.nilanshi.nigam.personalassistant.activity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.percent.PercentLayoutHelper;
+import android.support.percent.PercentRelativeLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -32,7 +42,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.nilanshi.nigam.personalassistant.R;
 
-public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
+public class LoginActivity extends BaseActivity implements View.OnClickListener {
     private CallbackManager mCallbackManager;
     private FirebaseAuth mAuth;
     private static final int RC_SIGN_IN = 9001;
@@ -42,6 +52,16 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private EditText etPassword;
     private Button btnLogin;
     private int id;
+    private LinearLayout llSignin;
+    private LinearLayout llsignup;
+    private TextView tvSignupInvoker;
+    private TextView tvSigninInvoker;
+    private Button btnSignup;
+    private LinearLayout llSignup;
+    private boolean isSigninScreen = true;
+    private EditText etUser;
+    private EditText etUserPass;
+    private EditText etConfPass;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +73,54 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         etPassword = (EditText) findViewById(R.id.etPassword);
         btnLogin = (Button) findViewById(R.id.btnLogin);
         btnLogin.setOnClickListener(this);
+
+        etUser = (EditText) findViewById(R.id.etUser);
+        etUserPass = (EditText) findViewById(R.id.etUserPass);
+        etConfPass = (EditText) findViewById(R.id.etConfPass);
+        btnSignup = (Button) findViewById(R.id.btnSignup);
+        signupDetails();
+
+
+        /*Login slider*/
+        llSignin = (LinearLayout) findViewById(R.id.llSignin);
+        llSignin.setOnClickListener(this);
+        //LinearLayout singnin =(LinearLayout)findViewById(R.id.signin);
+        llsignup = (LinearLayout) findViewById(R.id.llSignup);
+        llsignup.setOnClickListener(this);
+        tvSignupInvoker = (TextView) findViewById(R.id.tvSignupInvoker);
+        tvSigninInvoker = (TextView) findViewById(R.id.tvSigninInvoker);
+        llSignup = (LinearLayout) findViewById(R.id.llSignup);
+        llSignin = (LinearLayout) findViewById(R.id.llSignin);
+
+        tvSignupInvoker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                isSigninScreen = false;
+                showSignupForm();
+            }
+        });
+
+        tvSigninInvoker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                isSigninScreen = true;
+                showSigninForm();
+            }
+        });
+        showSigninForm();
+
+        btnSignup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Animation clockwise = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotate_right_to_left);
+                if (isSigninScreen) {
+                    btnSignup.startAnimation(clockwise);
+                }
+            }
+        });
+
+
+        /*login slider*/
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -91,15 +159,17 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 //Log.d(TAG, "facebook:onSuccess:" + loginResult);
                 handleFacebookAccessToken(loginResult.getAccessToken());
             }
+
             @Override
             public void onCancel() {
 //Log.d(TAG, "facebook:onCancel");
                 Toast.makeText(LoginActivity.this, "you cancelled Login", Toast.LENGTH_SHORT).show();
             }
+
             @Override
             public void onError(FacebookException error) {
 //Log.d(TAG, "facebook:onError", error);
-                Toast.makeText(LoginActivity.this, "there was this error : "+error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this, "there was this error : " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
 // Initialize Firebase Auth
@@ -110,6 +180,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -129,6 +200,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             }
         }
     }
+
     private void handleFacebookAccessToken(AccessToken token) {
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         mAuth.signInWithCredential(credential)
@@ -143,7 +215,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         } else {
 // If sign in fails, display a message to the user.
 //Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            Toast.makeText(LoginActivity.this, "Authentication failed."+task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Authentication failed." + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             updateUI(null);
                         }
 // ...
@@ -159,13 +231,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         FirebaseUser currentUser = mAuth.getCurrentUser();
         updateUI(currentUser);
     }
+
     private void updateUI(FirebaseUser currentUser) {
-        if (currentUser!=null){
-            Intent intent= new Intent(LoginActivity.this,CommandActivity.class);
+        if (currentUser != null) {
+            Intent intent = new Intent(LoginActivity.this, CommandActivity.class);
             startActivity(intent);
             finish();
         }
     }
+
     @Override
     public void onStop() {
         super.onStop();
@@ -207,7 +281,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             Toast.makeText(this, "Email field is empty", Toast.LENGTH_SHORT).show();
             return;
         }
-        if ( pass.isEmpty()) {
+        if (pass.isEmpty()) {
             Toast.makeText(this, "Password field is empty", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -231,4 +305,105 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     });
         }
     }
+
+    /*login and signup pages show*/
+    private void showSigninForm() {
+        PercentRelativeLayout.LayoutParams paramsLogin = (PercentRelativeLayout.LayoutParams) llSignin.getLayoutParams();
+        PercentLayoutHelper.PercentLayoutInfo infoLogin = paramsLogin.getPercentLayoutInfo();
+        infoLogin.widthPercent = 0.85f;
+        llSignin.requestLayout();
+
+
+        PercentRelativeLayout.LayoutParams paramsSignup = (PercentRelativeLayout.LayoutParams) llSignup.getLayoutParams();
+        PercentLayoutHelper.PercentLayoutInfo infoSignup = paramsSignup.getPercentLayoutInfo();
+        infoSignup.widthPercent = 0.15f;
+        llSignup.requestLayout();
+
+        Animation translate = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.translate_left_to_right);
+        llSignin.startAnimation(translate);
+
+        tvSignupInvoker.setVisibility(View.VISIBLE);
+        tvSigninInvoker.setVisibility(View.GONE);
+        Animation clockwise = AnimationUtils.loadAnimation(getApplicationContext(),
+                R.anim.rotate_left_to_right);
+        btnLogin.startAnimation(clockwise);
+
+    }
+
+    private void showSignupForm() {
+        PercentRelativeLayout.LayoutParams paramsLogin = (PercentRelativeLayout.LayoutParams) llSignin.getLayoutParams();
+        PercentLayoutHelper.PercentLayoutInfo infoLogin = paramsLogin.getPercentLayoutInfo();
+        infoLogin.widthPercent = 0.15f;
+        llSignin.requestLayout();
+
+
+        PercentRelativeLayout.LayoutParams paramsSignup = (PercentRelativeLayout.LayoutParams) llSignup.getLayoutParams();
+        PercentLayoutHelper.PercentLayoutInfo infoSignup = paramsSignup.getPercentLayoutInfo();
+        infoSignup.widthPercent = 0.85f;
+        llSignup.requestLayout();
+
+        tvSignupInvoker.setVisibility(View.GONE);
+        tvSigninInvoker.setVisibility(View.VISIBLE);
+        Animation translate = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.translate_right_to_left);
+        llSignup.startAnimation(translate);
+
+        Animation clockwise = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotate_right_to_left);
+        btnSignup.startAnimation(clockwise);
+    }
+    /*login and signup pages show*/
+
+    /*signup credential's*/
+    private void signupDetails() {
+        mAuth = FirebaseAuth.getInstance();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Intent i = new Intent(LoginActivity.this, CommandActivity.class);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+                    LayoutInflater inflater = LoginActivity.this.getLayoutInflater();
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent i = new Intent(LoginActivity.this, CommandActivity.class);
+                            startActivity(i);
+                        }
+                    });
+                }
+            }
+        };
+        btnSignup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String email = etUser.getText().toString();
+                String pass = etUserPass.getText().toString();
+                String confpass = etConfPass.getText().toString();
+
+
+                if (email.isEmpty()) {
+                    Toast.makeText(LoginActivity.this, "Email field is empty", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (pass.isEmpty()) {
+                    Toast.makeText(LoginActivity.this, "Password field is empty", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (confpass.isEmpty()) {
+                    Toast.makeText(LoginActivity.this, "Confirmation of password is not done", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (pass.compareTo(confpass) != 0) {
+                    Toast.makeText(LoginActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+            }
+
+
+        });
+    }
+    /*signup credential's*/
 }
+

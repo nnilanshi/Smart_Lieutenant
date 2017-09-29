@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#000000</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimaryDark">#122ac3</color>
     <color name="colorAccent">#fa08f8e4</color>
     <color name="background">#989bae</color>
     <color name="colorStart">#662D8C</color>
     <color name="colorEnd">#ED1E79</color>
+
+//edit text in login signup page
+    <color name="colorPrimaryTrans">#a0673AB7</color>
+    <color name="colorAccentTrans">#a0009688</color>
+    <color name="colorBlackTrans">#a0000000</color>
+    <color name="color_label">#ededed</color>
+    <color name="white_transparent">#fafafa</color>
+    <color name="color_input_hint">#FFF</color>
+    <color name="color_text_highlight">#fafafa</color>
+    <color name="color_text">#FFF</color>
 </resources>

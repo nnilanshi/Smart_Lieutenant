@@ -16,9 +16,8 @@
         android:id="@+id/ivPic"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:background="@drawable/circle_background"
-        android:elevation="1dp"
-        android:paddingTop="@dimen/nav_header_vertical_spacing" />
+        android:layout_gravity="center"
+        android:scaleType="centerCrop" />
 
     <TextView
         android:id="@+id/tvName"

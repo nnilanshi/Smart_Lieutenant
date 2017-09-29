@@ -18,8 +18,6 @@ import com.nilanshi.nigam.personalassistant.R;
 
 public class SignupActivity extends BaseActivity implements View.OnClickListener {
 
-
-
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private EditText etMail;
