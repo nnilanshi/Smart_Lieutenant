@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -36,7 +37,6 @@ import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.view.animation.AnticipateOvershootInterpolator;
 import android.view.animation.LayoutAnimationController;
-import android.widget.Adapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -63,9 +63,9 @@ import com.nightonke.boommenu.Piece.PiecePlaceEnum;
 import com.nilanshi.nigam.personalassistant.R;
 import com.nilanshi.nigam.personalassistant.adapter.ListAdapter;
 import com.nilanshi.nigam.personalassistant.util.BuilderManager;
-import com.nilanshi.nigam.personalassistant.util.ListModel;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -122,6 +122,10 @@ public class CommandActivity extends BaseActivity
     private CardView cardContainer;
     private String response;
     private String action;
+    private String message;
+    private String[] address;
+    private String subject;
+    private String song;
 
 
     @Override
@@ -152,6 +156,7 @@ public class CommandActivity extends BaseActivity
         cardContainer = (CardView) findViewById(R.id.cardContainer);
 
         setupPermissions();
+        list = new ArrayList<>();
         speech = SpeechRecognizer.createSpeechRecognizer(this);
         speech.setRecognitionListener(this);
         intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -222,11 +227,13 @@ public class CommandActivity extends BaseActivity
                 AIConfiguration.SupportedLanguages.English, AIConfiguration.RecognitionEngine.System);
         aiService = AIService.getService(this, config);
         aiService.setListener(this);
+        list = new ArrayList<>();
 
         //bottom sheet
         BottomSheetBehavior.BottomSheetCallback sheetCallback = new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
+
             }
 
             @Override
@@ -294,7 +301,8 @@ public class CommandActivity extends BaseActivity
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             permission = checkSelfPermission(Manifest.permission.RECORD_AUDIO);
             if (permission != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.MODIFY_AUDIO_SETTINGS, Manifest.permission.SET_ALARM}, 212);
+                requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.MODIFY_AUDIO_SETTINGS,
+                        Manifest.permission.SET_ALARM, Manifest.permission.CAMERA, Manifest.permission.READ_CONTACTS, Manifest.permission.READ_EXTERNAL_STORAGE}, 212);
                 return;
             } else {
                 setupVisualizer();
@@ -426,7 +434,7 @@ public class CommandActivity extends BaseActivity
         String message;
         switch (i) {
             case SpeechRecognizer.ERROR_AUDIO:
-                message = "Audio recording error";
+                message = "Audio recordinFg error";
                 break;
             case SpeechRecognizer.ERROR_CLIENT:
                 message = "Client side error";
@@ -674,16 +682,16 @@ public class CommandActivity extends BaseActivity
         });
         recycler = (RecyclerView) findViewById(R.id.rvList);
         LinearLayoutManager manager = new LinearLayoutManager(this);
-        list = new ArrayList<>();
+
         adapter = new ListAdapter(list);
         recycler.setLayoutManager(manager);
         recycler.setAdapter(adapter);
-        final LayoutAnimationController controller =
-                AnimationUtils.loadLayoutAnimation(context, R.anim.layout_animation_fall_down);
-        process_action(action);
-        recycler.setLayoutAnimation(controller);
+        /*final LayoutAnimationController controller =
+                AnimationUtils.loadLayoutAnimation(context, R.anim.layout_animation_fall_down);*/
+        process_action(result1);
+        //recycler.setLayoutAnimation(controller);
 
-        recycler.scheduleLayoutAnimation();
+        //recycler.scheduleLayoutAnimation();
 
         list.add(result1.getResolvedQuery());
 
@@ -691,17 +699,134 @@ public class CommandActivity extends BaseActivity
 
     }
 
-    //intent working
-    private void process_action(String action) {
+    //various intents for p.a
+    private void process_action(Result result1) {
         MyIntent myIntent = new MyIntent(context);
-        switch (action) {
-            case "alarm.set":
-                setupPermissions();
-                myIntent.createAlarm("hello Alarm set",0,0);
+        try {
+            switch (action) {
+                case "alarm.set":
+                    setupPermissions();
 
-                break;
+                    if (result1.getTimeParameter("time") != null) {
+                        Date time = result1.getTimeParameter("time");
+                        myIntent.createAlarm("hello Alarm set", time.getHours(), time.getMinutes(), time.getDay());
+                    }
+                    break;
+
+                case "camera.capture":
+                    setupPermissions();
+                    myIntent.capturePhoto();
+
+                    break;
+
+                case "video.capture":
+                    setupPermissions();
+                    myIntent.captureVideo();
+                    break;
+
+                case "email.send":
+                    setupPermissions();
+                    if (result1.getParameters().size() > 0) {
+                        if (result1.getStringParameter("email") != null) {
+                            message = result1.getStringParameter("email");
+                            address = message.split(",");
+                        }
+                        if (result1.getStringParameter("subject") != null) {
+                            subject = result1.getStringParameter("subject");
+                        }
+                    }
+                    myIntent.composeMail(address, subject);
+                    break;
+
+                case "music.play":
+                    setupPermissions();
+                    if (result1.getParameters().size() > 0) {
+                        if (result1.getStringParameter("songname") != null) {
+                            message = result1.getStringParameter("songname");
+                        }
+                    }
+                    myIntent.playMedia(message);
+                    break;
+
+                case "web.search":
+                    setupPermissions();
+                    if (result1.getParameters().size() > 0) {
+                        if (result1.getStringParameter("item") != null) {
+                            song = result1.getStringParameter("item");
+                        }
+                    }
+                    myIntent.searchWeb(song);
+                    break;
+
+                case "wifi.settings":
+                    setupPermissions();
+                    myIntent.openWifiSettings();
+                    break;
+
+                case "all.settings":
+                    setupPermissions();
+                    myIntent.openSettings();
+                    break;
+
+                case "airplane.settings":
+                    setupPermissions();
+                    myIntent.openAirplaneSettings();
+                    break;
+
+                case "apn.settings":
+                    setupPermissions();
+                    myIntent.openApnSettings();
+                    break;
+
+                case "bluetooth.settings":
+                    setupPermissions();
+                    myIntent.openBluetoothSettings();
+                    break;
+
+                case "input.settings":
+                    setupPermissions();
+                    myIntent.openInputMethodSettings();
+                    break;
+
+                case "display.settings":
+                    setupPermissions();
+                    myIntent.openDisplaySettings();
+                    break;
+
+                case "security.settings":
+                    setupPermissions();
+                    myIntent.openSecuritySettings();
+                    break;
+
+                case "location.settings":
+                    setupPermissions();
+                    myIntent.openLocationSettings();
+                    break;
+
+                case "internal.settings":
+                    setupPermissions();
+                    myIntent.openInternalSettings();
+                    break;
+
+                case "memory.settings":
+                    setupPermissions();
+                    myIntent.openMemoryCardSettings();
+                    break;
+
+                /*case "contact.search":
+                    setupPermissions();
+                    Intent recievedIntent = getIntent();
+                    String phoneColumnIndex = recievedIntent.getStringExtra("com.nilanshi.nigam.personalassistant.extra_phoneColumnIndex");
+                    String emailColumnIndex = recievedIntent.getStringExtra("com.nilanshi.nigam.personalassistant.extra_emailColumnIndex");
+                    String nameColumnIndex = recievedIntent.getStringExtra("com.nilanshi.nigam.personalassistant.extra_nameColumnIndex");
+                    result1.setAction(phoneColumnIndex);
+                    result1.setAction(emailColumnIndex);
+                    result1.setAction(nameColumnIndex);
+                    myIntent.handleContacts(this, recievedIntent);*/
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-
     }
 
     @Override
@@ -711,7 +836,6 @@ public class CommandActivity extends BaseActivity
 
     @Override
     public void onAudioLevel(float level) {
-
     }
 
     @Override
